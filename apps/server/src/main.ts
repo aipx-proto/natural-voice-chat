@@ -27,4 +27,6 @@ app.get("*", function (_request, response) {
 app.use(logRoute);
 app.use(logError);
 
+app.listen(port);
+
 console.log(`[server] Listening at port ${port}`);
