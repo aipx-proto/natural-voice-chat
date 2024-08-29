@@ -1,0 +1,26 @@
+{
+  "name": "root",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "npm run build && npm run start:server",
+    "dev": "concurrently npm:dev:*",
+    "dev:server": "npm run dev -w ./apps/server",
+    "dev:web": "npm run dev -w ./apps/web",
+    "build": "npm run clean:server && concurrently npm:build:*",
+    "build:server": "npm run build -w ./apps/server",
+    "build:web": "npm run build -w ./apps/web",
+    "start:server": "npm run preview -w ./apps/server",
+    "clean:server": "npm run clean -w ./apps/server"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    "apps/*"
+  ],
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {}
+}
