@@ -10,7 +10,7 @@
     "build": "npm run clean:server && concurrently npm:build:*",
     "build:server": "npm run build -w ./apps/server",
     "build:web": "npm run build -w ./apps/web",
-    "start:server": "npm run preview -w ./apps/server",
+    "start:server": "npm run start -w ./apps/server",
     "clean:server": "npm run clean -w ./apps/server"
   },
   "keywords": [],

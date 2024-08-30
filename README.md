@@ -1,8 +1,27 @@
-# GitHub + Azure Search + Eval
+# Natural Voice Chat
 
-GitHub Primer React based prototype to show how Azure Search and Eval can be used for
-- Simple file based grounding
-- Search based RAG
-- Evaluation of fine-tuned models
+## Get started
 
-As a side quest, the prototype allows designs to use the top search bar `[Type / to search or ask Copilot]` to execute a design command with AI, e.g. switch from two-column to three-column layout.
+```bash
+cp .env.example .env
+# Make sure you add endpoints and API keys in the newly created .env file.
+
+npm install
+npm start
+```
+
+Visit `http://localhost:3000` in your browser.
+
+## Dev mode
+
+Dev mode allow hot reload for both server and client changes.
+
+```bash
+npm run dev
+```
+
+Visit `http://localhost:3004` in your browser.
+
+## Caveats
+
+- This does not seem to work on mobile devices. The feature flag `http://localhost:3000/?iphone` will supposedly only call mobile compabitible APIs, but it currently does not work.

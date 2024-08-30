@@ -8,8 +8,7 @@
     "dev": "concurrently npm:dev:*",
     "dev:start": "mkdir -p dist && touch dist/main.js && node --watch-path dist --env-file=.env dist/main.js",
     "clean": "rm -rf dist",
-    "start": "NODE_ENV=production node dist/main.js",
-    "preview": "NODE_ENV=production node --env-file=.env dist/main.js",
+    "start": "NODE_ENV=production node --env-file=.env dist/main.js",
     "build": "esbuild src/main.ts --platform=node --sourcemap --target=node20 --bundle --outdir=dist --loader:.html=text",
     "dev:build": "npm run build -- --watch"
   },

@@ -1,4 +1,11 @@
-import { AudioConfig, SpeechConfig, SpeechRecognizer, SpeechSynthesizer } from "microsoft-cognitiveservices-speech-sdk";
+import {
+  AudioConfig,
+  SpeakerAudioDestination,
+  SpeechConfig,
+  SpeechRecognizer,
+  SpeechSynthesisResult,
+  SpeechSynthesizer,
+} from "microsoft-cognitiveservices-speech-sdk";
 import React, { Fragment, useCallback, useMemo, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { debounceTime, of, Subject, Subscription, switchMap, tap } from "rxjs";
@@ -11,6 +18,8 @@ import { removePrefixSpaceInsensitive } from "./lib/remove-prefix";
 import { useCognitiveServiceAccessToken } from "./lib/use-cognitive-service-access-token";
 
 import "./style.css";
+
+const isIPhone = location.search.includes("iphone");
 
 function App() {
   const { thread, threadRef, appendContent, appendMessage, appendSpokenContent, appendSynthesizedContent, closeMessage, trimToSpokenContent, reset } =
@@ -25,12 +34,14 @@ function App() {
     microphone?: SpeechRecognizer;
     synthesizer?: SpeechSynthesizer;
     speaker?: CustomOutputStream;
+    iPhoneSpeaker?: SpeakerAudioDestination;
   }>({});
 
   const stopHardware = useCallback(() => {
     try {
       hardware.current.synthesizer?.close();
       hardware.current.speaker?.stop();
+      hardware.current.iPhoneSpeaker?.mute();
     } catch {}
   }, []);
 
@@ -45,16 +56,22 @@ function App() {
   const startHardware = useCallback((token: string, region: string) => {
     const speechConfig = SpeechConfig.fromAuthorizationToken(token, region);
     const microphone = new SpeechRecognizer(speechConfig, AudioConfig.fromDefaultMicrophoneInput());
-    const synthesizer = new SpeechSynthesizer(speechConfig, AudioConfig.fromStreamOutput(new NullSink()));
-    const speaker = new CustomOutputStream({
-      rate: speechRateRef.current,
-    });
-    speaker.start();
+    const speaker = isIPhone ? undefined : new CustomOutputStream({ rate: speechRateRef.current });
+    const iPhoneSpeaker = isIPhone ? new SpeakerAudioDestination() : undefined;
+
+    const synthesizer = new SpeechSynthesizer(
+      speechConfig,
+      isIPhone ? AudioConfig.fromSpeakerOutput(iPhoneSpeaker) : AudioConfig.fromStreamOutput(new NullSink())
+    );
+
+    speaker?.start();
+    iPhoneSpeaker?.unmute();
 
     hardware.current = {
       microphone,
       synthesizer,
       speaker,
+      iPhoneSpeaker,
     };
   }, []);
 
@@ -99,13 +116,31 @@ function App() {
               const lastAssistantMessage = threadRef.current.at(-1);
               const lastAssistantMessageId = lastAssistantMessage?.role === "assistant" ? lastAssistantMessage.id : appendMessage(assistant``);
               appendContent(lastAssistantMessageId, text);
-              hardware.current.synthesizer?.speakTextAsync(text!, (result) => {
+
+              const handleSynthesized = (result: SpeechSynthesisResult) => {
                 appendSynthesizedContent(lastAssistantMessageId, text);
+                // This will be no-op for iPhone
                 hardware.current.speaker?.appendBuffer(new Uint8Array(result.audioData), () => {
                   delayedCommit.next(id);
                   appendSpokenContent(lastAssistantMessageId, text);
                 });
-              });
+              };
+
+              if (isIPhone) {
+                hardware.current.synthesizer?.speakSsmlAsync(
+                  `
+<speak version="1.0" xmlns="https://www.w3.org/2001/10/synthesis" xml:lang="en-US">
+  <voice name="en-US-AvaMultilingualNeural">
+    <prosody rate="${speechRateRef.current}">
+    ${text}
+    </prosody>
+  </voice>
+</speak>`,
+                  handleSynthesized
+                );
+              } else {
+                hardware.current.synthesizer?.speakTextAsync(text!, handleSynthesized);
+              }
             })
           );
         })
@@ -118,7 +153,6 @@ function App() {
     setIsRecording(false);
     stopHardware();
 
-    hardware.current.speaker?.stop();
     activeTask.current?.unsubscribe();
   }, [stopHardware]);
 
@@ -137,17 +171,21 @@ function App() {
         </summary>
         <div>
           <ul>
-            <li>
-              <mark>This demo does not work on iPhone. Use an iPad, Android, PC, or Mac instead.</mark>
-            </li>
             <li>User can interrupt AI speech at anytime</li>
             <li>AI will pause until user finishes their turn</li>
             <li>AI will "forget" unspoken content after interruped by user</li>
-            <li>
-              Color coding: <span style={{ opacity: 0.25 }}>Text arrived</span> {"->"}
-              <span style={{ opacity: 0.75 }}>Audio arrived</span> {"-> "}
-              <span style={{ background: "black", color: "white" }}>Audio played</span>
-            </li>
+            {isIPhone ? (
+              <li>
+                Color coding: <span style={{ opacity: 0.25 }}>Text arrived</span> {"->"}
+                <span style={{ opacity: 0.75 }}>Audio arrived</span>
+              </li>
+            ) : (
+              <li>
+                Color coding: <span style={{ opacity: 0.25 }}>Text arrived</span> {"->"}
+                <span style={{ opacity: 0.75 }}>Audio arrived</span> {"-> "}
+                <span style={{ background: "black", color: "white" }}>Audio played</span>
+              </li>
+            )}
             <li>
               <details>
                 <summary>Future work</summary>
