@@ -41,7 +41,7 @@ function App() {
     apiKey: config.value.speechApiKey,
   });
 
-  const { getChatStream } = useMemo(() => new ChatClient(config.value.aoaiEndpoint, config.value.aoaiKey), [config.value.aoaiEndpoint, config.value.aoaiKey]);
+  const chatClient = useMemo(() => new ChatClient(config.value.aoaiEndpoint, config.value.aoaiKey), [config.value.aoaiEndpoint, config.value.aoaiKey]);
 
   const hardware = useRef<{
     microphone?: SpeechRecognizer;
@@ -124,7 +124,7 @@ function App() {
             leaveOpen: true,
           });
 
-          return chatDeltaToSentenceStream(getChatStream(threadRef.current, { max_tokens: 1000 })).pipe(
+          return chatDeltaToSentenceStream(chatClient.getChatStream(threadRef.current, { max_tokens: 1000 })).pipe(
             tap((text) => {
               const lastAssistantMessage = threadRef.current.at(-1);
               const lastAssistantMessageId = lastAssistantMessage?.role === "assistant" ? lastAssistantMessage.id : appendMessage(assistant``);
@@ -159,7 +159,7 @@ function App() {
         })
       )
       .subscribe();
-  }, [stopHardware, startHardware, appendContent, appendSpokenContent, appendSynthesizedContent, appendMessage, closeMessage, getChatStream, getEndpoint]);
+  }, [stopHardware, startHardware, appendContent, appendSpokenContent, appendSynthesizedContent, appendMessage, closeMessage, chatClient, getEndpoint]);
 
   const handleStop = useCallback(() => {
     trimToSpokenContent();
@@ -184,6 +184,15 @@ function App() {
         </summary>
         <div>
           <ul>
+            {isIPhone ? (
+              <li>
+                This demo is iPhone specific. <a href="/">General demo here.</a>
+              </li>
+            ) : (
+              <li>
+                This demo is imcompatible with iPhone. <a href="/?iphone">iPhone specific demo here</a>
+              </li>
+            )}
             <li>User can interrupt AI speech at anytime</li>
             <li>AI will pause until user finishes their turn</li>
             <li>AI will "forget" unspoken content after interruped by user</li>
