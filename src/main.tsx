@@ -21,6 +21,9 @@ import { useLocalStorage } from "./lib/use-local-storage";
 import { useThread } from "./lib/use-thread";
 import "./style.css";
 
+// Treat iPhone based on URL feature flag because [MediaSource](https://developer.mozilla.org/en-US/docs/Web/API/MediaSource) API is not supported on iPhone
+// This demo replies on MediaSource API to track and display playback progress.
+// Without the API, we will perform speech-to-text-to-speech without displaying the playback progress
 const isIPhone = location.search.includes("iphone");
 
 function App() {
