@@ -4,16 +4,5 @@ import { defineConfig } from "vite";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  server: {
-    proxy: {
-      "/proxy": {
-        target: "http://localhost:3000",
-        changeOrigin: true,
-      },
-      "/api": {
-        target: "http://localhost:3000",
-        changeOrigin: true,
-      },
-    },
-  },
+  base: `/natural-voice-chat/`, // This is hard coded for the GitHub Pages deployment. See https://vitejs.dev/guide/static-deploy#github-pages
 });
