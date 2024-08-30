@@ -4,6 +4,7 @@ body {
   max-width: 800px;
   margin: auto;
   padding-bottom: 40px;
+  font-size: 14px;
 }
 
 .c-raw-message {
@@ -11,5 +12,14 @@ body {
 }
 
 button {
-  padding: 8px 16px;
+  padding: 4px 16px;
+}
+
+input {
+  padding: 4px;
+}
+
+* {
+  box-sizing: border-box;
+  font-size: inherit;
 }

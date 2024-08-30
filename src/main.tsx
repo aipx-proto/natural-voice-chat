@@ -17,11 +17,18 @@ import { NullSink } from "./lib/null-sink";
 import { removePrefixSpaceInsensitive } from "./lib/remove-prefix";
 import { useCognitiveServiceAccessToken } from "./lib/use-cognitive-service-access-token";
 
+import { useLocalStorage } from "./lib/use-local-storage";
 import "./style.css";
 
 const isIPhone = location.search.includes("iphone");
 
 function App() {
+  // load access token for cognitive service
+  const config = useLocalStorage({
+    key: "speech-demo-config",
+    getInitialValue: () => ({ aoaiKey: "", aoaiEndpoint: "", speechApiKey: "", speechRegion: "" }),
+  });
+
   const { thread, threadRef, appendContent, appendMessage, appendSpokenContent, appendSynthesizedContent, closeMessage, trimToSpokenContent, reset } =
     useThread({
       getInitialMessages: () => [system`You are a helpful AI voice assistant. Have a conversation with the user best as you can.`],
@@ -165,7 +172,7 @@ function App() {
 
   return (
     <main>
-      <details open>
+      <details>
         <summary>
           <b>Natural Conversation POC</b>
         </summary>
@@ -200,7 +207,59 @@ function App() {
         </div>
       </details>
       <br />
-
+      <details open>
+        <summary>
+          <b>Azure service connections</b>
+        </summary>
+        <div style={{ display: "grid" }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <label htmlFor="region">Speech serivce region</label>
+            <div>
+              Find or deploy in <a href="https://ai.azure.com/resource">AI Studio</a>
+            </div>
+          </div>
+          <input
+            id="region"
+            type="text"
+            placeholder="westus"
+            onChange={(e) => config.update((prev) => ({ ...prev, speechRegion: e.target.value }))}
+            value={config.value.speechRegion}
+          />
+          <br />
+          <label id="sppechApiKey">Speech service API Key</label>
+          <input
+            id="speechApiKey"
+            type="password"
+            placeholder="apiKey"
+            onChange={(e) => config.update((prev) => ({ ...prev, speechApiKey: e.target.value }))}
+            value={config.value.speechApiKey}
+          />
+          <br />
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <label htmlFor="openaiEndpoint">Azure OpenAI chat completion endpoint</label>
+            <div>
+              Find or deploy at <a href="https://oai.azure.com/resource/deployments">Azure OpenAI Studio</a>
+            </div>
+          </div>
+          <input
+            id="openaiEndpoint"
+            type="url"
+            placeholder="https://my-resource.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2023-03-15-preview"
+            onChange={(e) => config.update((prev) => ({ ...prev, aoaiEndpoint: e.target.value }))}
+            value={config.value.aoaiEndpoint}
+          />
+          <br />
+          <label htmlFor="openaiKey">Azure OpenAI API key</label>
+          <input
+            id="openaiKey"
+            type="password"
+            placeholder="apiKey"
+            onChange={(e) => config.update((prev) => ({ ...prev, aoaiKey: e.target.value }))}
+            value={config.value.aoaiKey}
+          />
+        </div>
+      </details>
+      <br />
       <details open>
         <summary>
           <b>Conversation</b>

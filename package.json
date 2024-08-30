@@ -1,26 +1,23 @@
 {
-  "name": "root",
-  "version": "1.0.0",
-  "description": "",
+  "name": "web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "start": "npm run build && npm run start:server",
-    "dev": "concurrently npm:dev:*",
-    "dev:server": "npm run dev -w ./apps/server",
-    "dev:web": "npm run dev -w ./apps/web",
-    "build": "npm run clean:server && concurrently npm:build:*",
-    "build:server": "npm run build -w ./apps/server",
-    "build:web": "npm run build -w ./apps/web",
-    "start:server": "npm run start -w ./apps/server",
-    "clean:server": "npm run clean -w ./apps/server"
+    "dev": "vite",
+    "build": "vite build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "workspaces": [
-    "apps/*"
-  ],
+  "dependencies": {
+    "microsoft-cognitiveservices-speech-sdk": "^1.40.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "rxjs": "^7.8.1"
+  },
   "devDependencies": {
-    "concurrently": "^8.2.2"
-  },
-  "dependencies": {}
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.3.4"
+  }
 }
