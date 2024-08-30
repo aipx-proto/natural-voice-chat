@@ -3,7 +3,14 @@
 ## Get started
 
 ```bash
+# One time install of dependencies
+npm install
+
+# Dev server with hot reloading
 npm run dev
+
+# Build as static web app in /dist
+npm run build
 ```
 
 ## Notes
